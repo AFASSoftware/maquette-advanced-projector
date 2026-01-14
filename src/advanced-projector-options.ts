@@ -1,11 +1,6 @@
-import {
-  Projection,
-  ProjectionOptions,
-  ProjectorOptions,
-  VNode,
-} from "maquette";
+import { Projection, ProjectionOptions, ProjectorOptions, VNode } from "maquette";
 
-import { AdvancedProjector } from "./projector";
+import type { AdvancedProjector } from "./projector.js";
 
 export interface AllAdvancedProjectorOptions extends ProjectorOptions {
   /**
@@ -47,18 +42,8 @@ export interface AllAdvancedProjectorOptions extends ProjectorOptions {
 export type AdvancedProjectorOptions = Partial<AllAdvancedProjectorOptions>;
 
 export const defaultAdvancedProjectorOptions: AllAdvancedProjectorOptions = {
-  handleInterceptedEvent: (
-    projector: AdvancedProjector,
-    vNode: VNode,
-    node: Node,
-    evt: Event
-  ) => {
+  handleInterceptedEvent: (projector: AdvancedProjector, vNode: VNode, node: Node, evt: Event) => {
     projector.scheduleRender();
-    /* tslint:disable no-invalid-this */
-    return vNode.properties![`on${evt.type}`].apply(
-      vNode.properties!.bind || node,
-      [evt]
-    );
-    /* tslint:enable no-invalid-this */
+    return vNode.properties![`on${evt.type}`].apply(vNode.properties!.bind || node, [evt]);
   },
 };

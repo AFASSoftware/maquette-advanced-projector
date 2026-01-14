@@ -1,25 +1,16 @@
-import {
-  Projection,
-  ProjectionOptions,
-  Projector,
-  VNode,
-  VNodeProperties,
-  dom,
-} from "maquette";
+import { Projection, ProjectionOptions, Projector, VNode, VNodeProperties, dom } from "maquette";
 
 import {
   AdvancedProjectorOptions,
   AllAdvancedProjectorOptions,
   defaultAdvancedProjectorOptions,
-} from "./advanced-projector-options";
-import { applyDefaultProjectionOptions } from "./utils";
+} from "./advanced-projector-options.js";
+import { applyDefaultProjectionOptions } from "./utils.js";
 
-export interface AdvancedProjector extends Projector {
-  // No extra API thus far.
-}
+export type AdvancedProjector = Projector;
 
-let createParentNodePath = (node: Node, rootNode: Element) => {
-  let parentNodePath: Node[] = [];
+const createParentNodePath = (node: Node, rootNode: Element) => {
+  const parentNodePath: Node[] = [];
   while (node && node !== rootNode) {
     parentNodePath.push(node);
     node = node.parentNode!;
@@ -27,88 +18,64 @@ let createParentNodePath = (node: Node, rootNode: Element) => {
   return parentNodePath;
 };
 
-let find: <T>(items: T[], predicate: (item: T) => boolean) => T | undefined;
-if ((Array.prototype as any).find) {
-  find = (items, predicate) => items.find(predicate);
-} else {
-  find = (items, predicate) => items.filter(predicate)[0];
-}
-
-let findVNodeByParentNodePath = (
-  vnode: VNode,
-  parentNodePath: Node[]
-): VNode | undefined => {
+const findVNodeByParentNodePath = (vnode: VNode, parentNodePath: Node[]): VNode | undefined => {
   let result: VNode | undefined = vnode;
   parentNodePath.forEach((node) => {
     result =
       result && result.children
-        ? find(result.children, (child) => child.domNode === node)
+        ? result.children.find((child) => child.domNode === node)
         : undefined;
   });
   return result;
 };
 
-export let createAdvancedProjector = (
-  options: AdvancedProjectorOptions
-): AdvancedProjector => {
-  let projector: Projector;
-  let projectorOptions: AllAdvancedProjectorOptions = {
+export const createAdvancedProjector = (options: AdvancedProjectorOptions): AdvancedProjector => {
+  const projectorOptions: AllAdvancedProjectorOptions = {
     ...defaultAdvancedProjectorOptions,
     ...options,
   };
-  let projectionOptions = applyDefaultProjectionOptions(projectorOptions);
-  let performanceLogger = projectionOptions.performanceLogger!;
+  const projectionOptions = applyDefaultProjectionOptions(projectorOptions);
+  const performanceLogger = projectionOptions.performanceLogger!;
   let renderCompleted = true;
   let scheduled: number | undefined;
   let stopped = false;
-  let projections = [] as Projection[];
-  let renderFunctions = [] as (() => VNode)[]; // matches the projections array
+  const projections = [] as Projection[];
+  const renderFunctions = [] as (() => VNode)[]; // matches the projections array
 
-  let addProjection = (
+  const addProjection = (
     /* one of: dom.append, dom.insertBefore, dom.replace, dom.merge */
-    domFunction: (
-      node: Element,
-      vnode: VNode,
-      projectionOptions: ProjectionOptions
-    ) => Projection,
+    domFunction: (node: Element, vnode: VNode, projectionOptions: ProjectionOptions) => Projection,
     /* the parameter of the domFunction */
     node: Element,
     renderFunction: () => VNode
   ): void => {
+    // eslint-disable-next-line prefer-const -- projection is assigned after being captured in closure
     let projection!: Projection;
     projectionOptions.eventHandlerInterceptor = (
-      propertyName: string,
-      eventHandler: Function,
-      domNode: Node,
-      properties: VNodeProperties
+      _propertyName: string,
+      _eventHandler: (evt: Event) => boolean | void,
+      _domNode: Node,
+      _properties: VNodeProperties
     ) => {
       return function (this: Node, evt: Event) {
         performanceLogger("domEvent", evt);
-        let parentNodePath = createParentNodePath(
+        const parentNodePath = createParentNodePath(
           evt.currentTarget as Element,
           projection.domNode
         );
         parentNodePath.reverse();
-        let matchingVNode = findVNodeByParentNodePath(
-          projection.getLastRender(),
-          parentNodePath
-        );
+        const matchingVNode = findVNodeByParentNodePath(projection.getLastRender(), parentNodePath);
 
         let result: any;
         if (matchingVNode) {
-          result = projectorOptions.handleInterceptedEvent(
-            projector,
-            matchingVNode,
-            this,
-            evt
-          );
+          result = projectorOptions.handleInterceptedEvent(projector, matchingVNode, this, evt);
         }
         performanceLogger("domEventProcessed", evt);
         return result;
       };
     };
     projectorOptions.postProcessProjectionOptions?.(projectionOptions);
-    let firstVNode = renderFunction();
+    const firstVNode = renderFunction();
     projection = domFunction(node, firstVNode, projectionOptions);
     projectionOptions.eventHandlerInterceptor = undefined;
     projections.push(projection);
@@ -126,7 +93,7 @@ export let createAdvancedProjector = (
     renderCompleted = false;
     performanceLogger("renderStart", undefined);
     for (let i = 0; i < projections.length; i++) {
-      let updatedVnode = renderFunctions[i]();
+      const updatedVnode = renderFunctions[i]();
       performanceLogger("rendered", undefined);
       projections[i].update(updatedVnode);
       performanceLogger("patched", undefined);
@@ -143,7 +110,7 @@ export let createAdvancedProjector = (
     );
   }
 
-  projector = {
+  const projector: Projector = {
     renderNow: doRender,
     scheduleRender: () => {
       if (!scheduled && !stopped) {

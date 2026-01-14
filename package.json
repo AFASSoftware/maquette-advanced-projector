@@ -1,24 +1,30 @@
 {
   "name": "maquette-advanced-projector",
-  "version": "1.0.2",
+  "version": "2.0.0",
   "description": "A replacement for maquette's projector that is configurable",
-  "module": "./dist/index.js",
-  "main": "./dist/maquette-advanced-projector.cjs.js",
-  "browser": "./dist/maquette-advanced-projector.umd.js",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "test": "tsa ci",
-    "prepare": "npm run fix:hooks",
-    "prepublishOnly": "tsa clean && npm -s run dist",
-    "assist": "tsa assist",
-    "release": "tsa release",
-    "fix": "tsa fix",
-    "fixall": "tsa fixall",
-    "clean": "tsa clean",
-    "dist": "tsc -p ./src/tsconfig.json",
-    "ci": "tsa ci",
-    "coverage-show": "opn build/coverage/index.html",
-    "fix:hooks": "husky install"
+    "build": "tsc",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "clean": "rimraf dist coverage",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",
@@ -34,66 +40,21 @@
   },
   "homepage": "https://github.com/AFASSoftware/maquette-advanced-projector#readme",
   "devDependencies": {
-    "@types/chai-as-promised": "7.1.5",
-    "@types/node": "20.5.3",
-    "@types/sinon": "10.0.16",
-    "@types/sinon-chai": "3.2.9",
-    "chai-as-promised": "7.1.1",
-    "jsdom": "22.1.0",
-    "jsdom-global": "3.0.2",
-    "maquette": "3.6.0",
-    "sinon": "15.2.0",
-    "sinon-chai": "3.7.0",
-    "typescript-assistant": "^0.63.4"
+    "@eslint/js": "^9.18.0",
+    "@types/node": "^22.10.7",
+    "@vitest/coverage-v8": "^3.0.2",
+    "eslint": "^9.18.0",
+    "eslint-config-prettier": "^10.0.1",
+    "globals": "^15.14.0",
+    "jsdom": "^26.0.0",
+    "maquette": "^3.6.0",
+    "prettier": "^3.4.2",
+    "rimraf": "^6.0.1",
+    "typescript": "^5.7.3",
+    "typescript-eslint": "^8.20.0",
+    "vitest": "^3.0.2"
   },
   "peerDependencies": {
     "maquette": ">=3.5.1"
-  },
-  "nyc": {
-    "include": [
-      "src/**/*.ts"
-    ],
-    "extension": [
-      ".ts"
-    ],
-    "reporter": [
-      "lcov",
-      "html",
-      "text-summary"
-    ],
-    "cache": true,
-    "temp-directory": "./build/nyc/cache",
-    "all": false,
-    "check-coverage": true,
-    "report-dir": "./build/coverage",
-    "es-module": false,
-    "lines": 75,
-    "statements": 75,
-    "functions": 75,
-    "branches": 75,
-    "watermarks": {
-      "lines": [
-        75,
-        100
-      ],
-      "functions": [
-        75,
-        100
-      ],
-      "branches": [
-        75,
-        100
-      ],
-      "statements": [
-        75,
-        100
-      ]
-    }
-  },
-  "importSort": {
-    ".js, .jsx, .ts, .tsx": {
-      "style": "module",
-      "parser": "typescript"
-    }
   }
 }

@@ -4,14 +4,13 @@ on: [push]
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v2
-    - name: typescript-assistant ci
-      run: |
-        npm ci
-        npm run ci
-      env:
-        CI: true
+      - uses: actions/checkout@v2
+      - name: typescript-assistant ci
+        run: |
+          npm ci
+          npm run ci
+        env:
+          CI: true

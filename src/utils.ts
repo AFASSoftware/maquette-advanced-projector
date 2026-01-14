@@ -15,7 +15,7 @@ const DEFAULT_PROJECTION_OPTIONS: ProjectionOptions = {
   },
 };
 
-export let applyDefaultProjectionOptions = (
+export const applyDefaultProjectionOptions = (
   projectorOptions?: ProjectionOptions
 ): ProjectionOptions => {
   return { ...DEFAULT_PROJECTION_OPTIONS, ...projectorOptions };
