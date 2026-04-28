@@ -5,6 +5,11 @@ export default defineConfig({
     globals: true,
     environment: "jsdom",
     include: ["test/**/*.test.ts"],
+    server: {
+      deps: {
+        inline: ["maquette"],
+      },
+    },
     coverage: {
       provider: "v8",
       reporter: ["text", "html", "lcov"],
